@@ -1,0 +1,37 @@
+apiVersion: kafka.strimzi.io/v1alpha1
+kind: KafkaConnector
+metadata:
+  name: mongodb-sink-connector
+  labels:
+    strimzi.io/cluster: kafka-connect-cluster
+spec:
+  class: at.grahsl.kafka.connect.mongodb.MongoDbSinkConnector
+  tasksMax: 1
+  config:
+    mongodb.name: mongodb-sink-connector
+    topics: rail-search-store
+    
+    key.converter: org.apache.kafka.connect.storage.StringConverter
+    key.converter.schemas.enable: false
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: false
+
+    transforms: ValueToKey
+    transforms.ValueToKey.type: org.apache.kafka.connect.transforms.ValueToKey
+    transforms.ValueToKey.fields: EVENT_ID
+    
+    mongodb.max.num.retries: 3
+    mongodb.retries.defer.timeout: 5000
+    mongodb.document.id.strategy: at.grahsl.kafka.connect.mongodb.processor.id.strategy.BsonOidStrategy
+    mongodb.post.processor.chain: at.grahsl.kafka.connect.mongodb.processor.DocumentIdAdder
+    mongodb.writemodel.strategy: at.grahsl.kafka.connect.mongodb.writemodel.strategy.ReplaceOneDefaultStrategy
+    
+    mongodb.connection.uri: mongodb://admin:fe1a2d65f84b76fb9268e3ecf0c59831de4b2bbf739adc895@f2ffe6f6-3790-4f2b-b2bb-f41632ca36d0-0.c09unglw01gdsi4ks020.databases.appdomain.cloud:31368,f2ffe6f6-3790-4f2b-b2bb-f41632ca36d0-1.c09unglw01gdsi4ks020.databases.appdomain.cloud:31368,f2ffe6f6-3790-4f2b-b2bb-f41632ca36d0-2.c09unglw01gdsi4ks020.databases.appdomain.cloud:31368/ibmclouddb?authSource=admin&replicaSet=replset&ssl=true
+    #mongodb.user: admin
+    #mongodb.user: "${file:/opt/kafka/external-configuration/travelport-mongo-connector/user}"
+    #mongodb.password: fe1a2d65f84b76fb9268e3ecf0c59831de4b2bbf739adc895
+    #mongodb.password: "${file:/opt/kafka/external-configuration/travelport-mongo-connector/password}"
+    mongodb.collection: rail-search-cdc
+
+    #errors.tolerance: all
+    

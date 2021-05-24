@@ -1,0 +1,23 @@
+# apiVersion and kind of Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- namespace.yaml
+- secrets
+- config-map
+- ../../../base/kafka-connect
+- mongodb-sink-connector.yaml
+- file-sync-connector.yaml
+
+namespace: kafka-connect
+
+
+
+
+
+
+
+
+
+    

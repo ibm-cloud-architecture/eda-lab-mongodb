@@ -1,0 +1,16 @@
+kind: KafkaConnector
+apiVersion: kafka.strimzi.io/v1alpha1
+metadata:
+  name: file-sink-connector
+  labels:
+    strimzi.io/cluster: kafka-connect-cluster
+spec:
+  tasksMax: 1
+  class: org.apache.camel.kafkaconnector.file.CamelFileSinkConnector
+  config:
+    topics: rail-search-store
+    camel.sink.url: file:/tmp/?fileName=rail-search-store.txt&fileExist=Append
+    key.converter: org.apache.kafka.connect.storage.StringConverter
+    key.converter.schemas.enable: false
+    value.converter: org.apache.kafka.connect.storage.StringConverter
+    value.converter.schemas.enable: false

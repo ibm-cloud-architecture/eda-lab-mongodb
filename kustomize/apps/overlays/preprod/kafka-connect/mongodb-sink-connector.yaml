@@ -1,0 +1,35 @@
+apiVersion: kafka.strimzi.io/v1alpha1
+kind: KafkaConnector
+metadata:
+  name: mongodb-sink-connector
+  labels:
+    strimzi.io/cluster: kafka-connect-cluster
+spec:
+  class: at.grahsl.kafka.connect.mongodb.MongoDbSinkConnector
+  tasksMax: 1
+  config:
+    mongodb.name: mongodb-sink-connector
+    topics: rail-search-store
+    
+    key.converter: org.apache.kafka.connect.storage.StringConverter
+    key.converter.schemas.enable: false
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: false
+
+    transforms: ValueToKey
+    transforms.ValueToKey.type: org.apache.kafka.connect.transforms.ValueToKey
+    transforms.ValueToKey.fields: EVENT_ID
+    
+    mongodb.max.num.retries: 3
+    mongodb.retries.defer.timeout: 5000
+    mongodb.document.id.strategy: at.grahsl.kafka.connect.mongodb.processor.id.strategy.BsonOidStrategy
+    mongodb.post.processor.chain: at.grahsl.kafka.connect.mongodb.processor.DocumentIdAdder
+    mongodb.writemodel.strategy: at.grahsl.kafka.connect.mongodb.writemodel.strategy.ReplaceOneDefaultStrategy
+    
+    mongodb.connection.uri: mongodb://user:password@host:port/mongodb?authSource=admin&replicaSet=replset&ssl=true
+    #mongodb.user: "${file:/opt/kafka/external-configuration/mongo-connector-secret/user}"
+    #mongodb.password: "${file:/opt/kafka/external-configuration/mongo-connector-secret/password}"
+    mongodb.collection: mongodb-collection
+
+    #errors.tolerance: all
+    

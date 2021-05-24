@@ -1,0 +1,83 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: kafka-connect-cluster
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  #image: us.icr.io/tvpt-rail-artifact/tvpt-kafka-connector:0.0.1
+  image: imagename:tag
+  version: 2.5.0
+  replicas: 1
+  authentication: 
+    type: plain
+    username: token
+    passwordSecret:
+      secretName: kafka-connect-secret
+      password: password
+  template:
+    pod:
+      imagePullSecrets:
+        - name: image-artifact-secret
+  tls:
+    trustedCertificates: []
+  bootstrapServers: broker-4-8nlyq3z4f3ct4vxl.kafka.svc08.us-south.eventstreams.cloud.ibm.com:9093,broker-1-8nlyq3z4f3ct4vxl.kafka.svc08.us-south.eventstreams.cloud.ibm.com:9093,broker-3-8nlyq3z4f3ct4vxl.kafka.svc08.us-south.eventstreams.cloud.ibm.com:9093,broker-0-8nlyq3z4f3ct4vxl.kafka.svc08.us-south.eventstreams.cloud.ibm.com:9093,broker-5-8nlyq3z4f3ct4vxl.kafka.svc08.us-south.eventstreams.cloud.ibm.com:9093,broker-2-8nlyq3z4f3ct4vxl.kafka.svc08.us-south.eventstreams.cloud.ibm.com:9093
+  config: 
+    group.id: mongodb-connect-cluster
+    offset.storage.topic: kafka-connect-cluster-offsets
+    offset.storage.partitions: 1
+    config.storage.topic: kafka-connect-cluster-configs
+    config.storage.partitions: 1
+    status.storage.topic: kafka-connect-cluster-status
+    status.storage.partitions: 1
+    config.providers: file
+    config.providers.file.class: org.apache.kafka.common.config.provider.FileConfigProvider
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: false
+    value.converter.schemas.enable: false
+    config.storage.replication.factor: 3
+    offset.storage.replication.factor: 3
+    status.storage.replication.factor: 3
+  externalConfiguration:
+    volumes:
+      - name: mongo-connector-secret
+        secret:
+          secretName: mongo-connector-secret
+      - name: mongo-ssl-secret
+        secret:
+          secretName: mongo-ssl-secret
+  logging: 
+    type: inline
+    loggers:
+      log4j.rootLogger: "INFO"
+  readinessProbe: 
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+  livenessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+  jvmOptions:
+    "-Xmx": "1g"
+    "-Xms": "1g"
+    javaSystemProperties:
+      #- name: javax.net.debug
+      #  value: ssl
+      - name: javax.net.ssl.trustStore
+        value: /opt/kafka/external-configuration/mongo-ssl-secret/mongo-cert
+      - name: javax.net.ssl.trustStorePassword
+        value: tvptmvp
+      - name: javax.net.ssl.keyStore
+        value: /opt/kafka/external-configuration/mongo-ssl-secret/mongo-cert
+      - name: javax.net.ssl.keyStorePassword
+        #value: /opt/kafka/external-configuration/travelport-mongo-connector/passphase
+        value: pass-phase
+        
+    
+        
+      
+        
+      
+      
+
+    
